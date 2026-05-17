@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# soomin ahn — portfolio
 
-## Getting Started
+Next.js + Supabase site for Soomin Ahn.
 
-First, run the development server:
+- **/** — home, carousel of featured artworks (image + title + statement + size)
+- **/work** — yearly grid of all artworks
+- **/cv** — text CV (education, exhibitions, awards, info)
+- **/admin** — password-protected admin to manage everything
+
+## Stack
+- Next.js (App Router) + TypeScript + Tailwind CSS v4
+- Supabase Postgres (data) + Supabase Storage (images)
+- Cookie-based admin auth (HMAC-signed, single password)
+- Deployed on Vercel with GitHub auto-deploy
+
+---
+
+## 1. Set up Supabase
+
+1. Create a project at https://supabase.com (free tier is fine).
+2. Open **SQL Editor** and paste the contents of [`supabase-schema.sql`](./supabase-schema.sql), then **Run**. This creates the `artworks` and `cv_entries` tables, sets RLS, and creates the public `artworks` storage bucket.
+3. Go to **Project Settings → API** and copy:
+   - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
+   - `anon` public key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `service_role` secret key → `SUPABASE_SERVICE_ROLE_KEY` (server-only!)
+
+## 2. Local env
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.local.example .env.local
+# Edit .env.local — fill in Supabase keys, choose an ADMIN_PASSWORD,
+# and generate AUTH_SECRET with:
+openssl rand -hex 32
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 3. Run locally
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+npm run dev
+# → http://localhost:3000
+# → http://localhost:3000/admin/login
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 4. Push to GitHub
 
-## Learn More
+```bash
+git add -A
+git commit -m "Initial commit"
 
-To learn more about Next.js, take a look at the following resources:
+# create a new empty repo on GitHub (private is fine), then:
+git remote add origin git@github.com:YOUR-USERNAME/soom.git
+git branch -M main
+git push -u origin main
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 5. Deploy on Vercel (GitHub auto-deploy)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Go to https://vercel.com/new
+2. **Import** the GitHub repo you just pushed.
+3. Framework: **Next.js** (auto-detected). Leave build settings as-is.
+4. **Environment Variables** — add all 5 keys from `.env.local`:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `ADMIN_PASSWORD`
+   - `AUTH_SECRET`
+5. Click **Deploy**.
 
-## Deploy on Vercel
+Every push to `main` will now auto-deploy. Pull requests get preview URLs.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## File structure
+
+```
+app/
+  layout.tsx              site shell (nav: home / work / cv)
+  page.tsx                home — server fetch
+  HomeCarousel.tsx        client carousel
+  work/page.tsx           yearly grid
+  cv/page.tsx             text CV grouped by section
+  admin/
+    page.tsx              dashboard
+    login/page.tsx        password form
+    actions.ts            server actions (login, CRUD, upload)
+    artworks/             artwork list + new + edit
+    cv/                   cv-entry list + new + edit
+lib/
+  auth.ts                 HMAC session token
+  supabase/public.ts      anon client (read)
+  supabase/admin.ts       service-role client (write)
+  types.ts                Artwork, CVEntry, CV_SECTIONS
+middleware.ts             protects /admin/* (except /admin/login)
+supabase-schema.sql       run in Supabase SQL editor
+```
+
+## Notes
+
+- Public pages (`/`, `/work`, `/cv`) use ISR with a 60-second revalidation window. After admin edits, affected paths are revalidated immediately via `revalidatePath`.
+- All admin writes go through server actions using the service-role key. The service-role key is never exposed to the browser.
+- Image uploads go to the public `artworks` storage bucket; the public URL is stored in `artworks.image_url`.
+- To rotate the admin password: update `ADMIN_PASSWORD` in Vercel and redeploy. To force-logout all sessions, also rotate `AUTH_SECRET` (existing cookies will fail signature check).
