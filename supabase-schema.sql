@@ -23,15 +23,13 @@ create index if not exists artworks_year_order_idx
 -- ============================================================================
 -- cv_entries (shown on /cv, grouped by section)
 -- ============================================================================
--- section values: 'education' | 'solo' | 'group' | 'award' | 'collection' | 'info'
+-- section values: 'contact' | 'education' | 'solo' | 'group' | 'interview'
 create table if not exists public.cv_entries (
   id uuid primary key default gen_random_uuid(),
   section text not null,
-  year int,                  -- nullable for 'info' rows
-  year_end int,              -- optional range end (e.g. education 2018–2020)
-  title text not null,       -- exhibition/program/award title
-  location text,             -- venue / institution / city
-  detail text,               -- extra notes
+  year int,                  -- nullable (e.g. contact rows have no year)
+  title text not null,       -- the full line of text for this entry
+  link text,                 -- optional URL (renders as ↗)
   display_order int not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

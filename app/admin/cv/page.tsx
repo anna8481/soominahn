@@ -63,18 +63,13 @@ export default async function AdminCVPage() {
                       key={e.id}
                       className="py-2.5 flex items-center gap-4 text-sm"
                     >
-                      <span className="w-16 text-neutral-500 tabular-nums">
+                      <span className="w-12 text-neutral-500 tabular-nums">
                         {e.year ?? ""}
-                        {e.year_end && e.year_end !== e.year
-                          ? `–${e.year_end}`
-                          : ""}
                       </span>
                       <span className="flex-1 min-w-0 truncate">
                         <span className="text-neutral-900">{e.title}</span>
-                        {e.location && (
-                          <span className="text-neutral-500">
-                            , {e.location}
-                          </span>
+                        {e.link && (
+                          <span className="ml-1 text-neutral-400">↗</span>
                         )}
                       </span>
                       <Link

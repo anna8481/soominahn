@@ -4,14 +4,6 @@ import { CV_SECTIONS } from "@/lib/types";
 
 export const revalidate = 60;
 
-function formatYear(entry: CVEntry): string {
-  if (entry.year == null) return "";
-  if (entry.year_end && entry.year_end !== entry.year) {
-    return `${entry.year}–${entry.year_end}`;
-  }
-  return String(entry.year);
-}
-
 export default async function CVPage() {
   const supabase = getPublicClient();
   const { data, error } = await supabase
@@ -58,22 +50,24 @@ export default async function CVPage() {
                   {rows.map((e) => (
                     <li
                       key={e.id}
-                      className="grid grid-cols-[64px_1fr] gap-4"
+                      className="grid grid-cols-[56px_1fr] gap-4"
                     >
                       <span className="text-neutral-500 tabular-nums">
-                        {formatYear(e)}
+                        {e.year ?? ""}
                       </span>
                       <span className="text-neutral-900">
-                        <span>{e.title}</span>
-                        {e.location && (
-                          <span className="text-neutral-500">
-                            , {e.location}
-                          </span>
-                        )}
-                        {e.detail && (
-                          <span className="text-neutral-500">
-                            {" "}— {e.detail}
-                          </span>
+                        {e.link ? (
+                          <a
+                            href={e.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:opacity-60"
+                          >
+                            {e.title}
+                            <span className="ml-1 text-neutral-400">↗</span>
+                          </a>
+                        ) : (
+                          e.title
                         )}
                       </span>
                     </li>

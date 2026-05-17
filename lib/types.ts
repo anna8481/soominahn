@@ -13,30 +13,26 @@ export type Artwork = {
 };
 
 export type CVSection =
+  | "contact"
   | "education"
   | "solo"
   | "group"
-  | "award"
-  | "collection"
-  | "info";
+  | "interview";
 
 export const CV_SECTIONS: { key: CVSection; label: string }[] = [
+  { key: "contact", label: "Contact" },
   { key: "education", label: "Education" },
-  { key: "solo", label: "Solo Exhibitions" },
-  { key: "group", label: "Group Exhibitions" },
-  { key: "award", label: "Awards & Grants" },
-  { key: "collection", label: "Collections" },
-  { key: "info", label: "Info" },
+  { key: "solo", label: "Solo Exhibition" },
+  { key: "group", label: "Group Exhibition" },
+  { key: "interview", label: "Article / Interview" },
 ];
 
 export type CVEntry = {
   id: string;
   section: CVSection;
   year: number | null;
-  year_end: number | null;
   title: string;
-  location: string | null;
-  detail: string | null;
+  link: string | null;
   display_order: number;
   created_at: string;
   updated_at: string;

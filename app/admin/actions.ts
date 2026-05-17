@@ -145,12 +145,11 @@ export async function deleteArtworkAction(id: string) {
 function readCVFields(formData: FormData) {
   const section = String(formData.get("section") ?? "") as CVSection;
   const allowed: CVSection[] = [
+    "contact",
     "education",
     "solo",
     "group",
-    "award",
-    "collection",
-    "info",
+    "interview",
   ];
   if (!allowed.includes(section)) throw new Error("Invalid section");
 
@@ -159,19 +158,13 @@ function readCVFields(formData: FormData) {
   if (year !== null && !Number.isFinite(year)) {
     throw new Error("Year must be a number");
   }
-  const yearEndRaw = String(formData.get("year_end") ?? "").trim();
-  const year_end = yearEndRaw === "" ? null : Number(yearEndRaw);
-  if (year_end !== null && !Number.isFinite(year_end)) {
-    throw new Error("Year end must be a number");
-  }
 
   const title = String(formData.get("title") ?? "").trim();
   if (!title) throw new Error("Title is required");
 
-  const location = String(formData.get("location") ?? "").trim() || null;
-  const detail = String(formData.get("detail") ?? "").trim() || null;
+  const link = String(formData.get("link") ?? "").trim() || null;
   const display_order = Number(formData.get("display_order") || 0);
-  return { section, year, year_end, title, location, detail, display_order };
+  return { section, year, title, link, display_order };
 }
 
 export async function createCVEntryAction(formData: FormData) {
