@@ -1,21 +1,53 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { getAdminClient } from "@/lib/supabase/admin";
+import { getSupabase } from "@/lib/supabase/public";
 import type { Artwork } from "@/lib/types";
-import { deleteArtworkAction } from "../actions";
+import { useRequireAuth } from "../useRequireAuth";
 
-export const dynamic = "force-dynamic";
+export default function AdminArtworksPage() {
+  const auth = useRequireAuth();
+  const [artworks, setArtworks] = useState<Artwork[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function AdminArtworksPage() {
-  const supabase = getAdminClient();
-  const { data, error } = await supabase
-    .from("artworks")
-    .select("*")
-    .order("year", { ascending: false })
-    .order("display_order", { ascending: true })
-    .order("created_at", { ascending: false });
+  async function load() {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("artworks")
+      .select("*")
+      .order("year", { ascending: false })
+      .order("display_order", { ascending: true })
+      .order("created_at", { ascending: false });
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setArtworks((data ?? []) as Artwork[]);
+  }
 
-  const artworks = (data ?? []) as Artwork[];
+  useEffect(() => {
+    if (auth === "authed") load();
+  }, [auth]);
+
+  async function onDelete(id: string) {
+    if (!confirm("Delete this artwork?")) return;
+    const { error } = await getSupabase().from("artworks").delete().eq("id", id);
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    load();
+  }
+
+  if (auth !== "authed") {
+    return (
+      <section className="mx-auto max-w-5xl px-6 py-12">
+        <p className="text-sm text-neutral-400">…</p>
+      </section>
+    );
+  }
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
@@ -38,10 +70,12 @@ export default async function AdminArtworksPage() {
       </div>
 
       {error && (
-        <p className="mt-6 text-sm text-red-600">Error: {error.message}</p>
+        <p className="mt-6 text-sm text-red-600">Error: {error}</p>
       )}
 
-      {artworks.length === 0 ? (
+      {artworks === null ? (
+        <p className="mt-12 text-sm text-neutral-400">…</p>
+      ) : artworks.length === 0 ? (
         <p className="mt-12 text-sm text-neutral-500">No artworks yet.</p>
       ) : (
         <ul className="mt-8 divide-y divide-neutral-200 border-t border-b border-neutral-200">
@@ -79,21 +113,17 @@ export default async function AdminArtworksPage() {
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <Link
-                  href={`/admin/artworks/${a.id}`}
+                  href={`/admin/artworks/edit?id=${a.id}`}
                   className="text-neutral-700 hover:text-neutral-900 underline"
                 >
                   edit
                 </Link>
-                <form
-                  action={async () => {
-                    "use server";
-                    await deleteArtworkAction(a.id);
-                  }}
+                <button
+                  onClick={() => onDelete(a.id)}
+                  className="text-red-600 hover:text-red-800"
                 >
-                  <button className="text-red-600 hover:text-red-800">
-                    delete
-                  </button>
-                </form>
+                  delete
+                </button>
               </div>
             </li>
           ))}

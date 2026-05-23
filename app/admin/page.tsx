@@ -1,16 +1,37 @@
+"use client";
+
 import Link from "next/link";
-import { logoutAction } from "./actions";
+import { useRouter } from "next/navigation";
+import { getSupabase } from "@/lib/supabase/public";
+import { useRequireAuth } from "./useRequireAuth";
 
 export default function AdminHome() {
+  const router = useRouter();
+  const auth = useRequireAuth();
+
+  async function onLogout() {
+    await getSupabase().auth.signOut();
+    router.replace("/admin/login");
+  }
+
+  if (auth !== "authed") {
+    return (
+      <section className="mx-auto max-w-3xl px-6 py-12">
+        <p className="text-sm text-neutral-400">…</p>
+      </section>
+    );
+  }
+
   return (
     <section className="mx-auto max-w-3xl px-6 py-12">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-light lowercase">admin</h1>
-        <form action={logoutAction}>
-          <button className="text-sm text-neutral-500 hover:text-neutral-900">
-            logout
-          </button>
-        </form>
+        <button
+          onClick={onLogout}
+          className="text-sm text-neutral-500 hover:text-neutral-900"
+        >
+          logout
+        </button>
       </div>
 
       <ul className="mt-10 space-y-3">

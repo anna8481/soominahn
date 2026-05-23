@@ -59,7 +59,7 @@ create trigger cv_entries_set_updated_at
   for each row execute function public.set_updated_at();
 
 -- ============================================================================
--- RLS: public read; writes go through server actions w/ service role key
+-- RLS: public read; authenticated users (Supabase Auth) can write
 -- ============================================================================
 alter table public.artworks enable row level security;
 alter table public.cv_entries enable row level security;
@@ -69,13 +69,27 @@ create policy "artworks public read"
   on public.artworks for select
   using (true);
 
+drop policy if exists "artworks auth write" on public.artworks;
+create policy "artworks auth write"
+  on public.artworks for all
+  to authenticated
+  using (true)
+  with check (true);
+
 drop policy if exists "cv_entries public read" on public.cv_entries;
 create policy "cv_entries public read"
   on public.cv_entries for select
   using (true);
 
+drop policy if exists "cv_entries auth write" on public.cv_entries;
+create policy "cv_entries auth write"
+  on public.cv_entries for all
+  to authenticated
+  using (true)
+  with check (true);
+
 -- ============================================================================
--- Storage bucket: artworks (public read)
+-- Storage bucket: artworks (public read, authenticated write)
 -- ============================================================================
 insert into storage.buckets (id, name, public)
 values ('artworks', 'artworks', true)
@@ -85,3 +99,10 @@ drop policy if exists "artworks bucket public read" on storage.objects;
 create policy "artworks bucket public read"
   on storage.objects for select
   using (bucket_id = 'artworks');
+
+drop policy if exists "artworks bucket auth write" on storage.objects;
+create policy "artworks bucket auth write"
+  on storage.objects for all
+  to authenticated
+  using (bucket_id = 'artworks')
+  with check (bucket_id = 'artworks');

@@ -1,8 +1,19 @@
+"use client";
+
 import Link from "next/link";
-import { createArtworkAction } from "../../actions";
 import ArtworkForm from "../ArtworkForm";
+import { useRequireAuth } from "../../useRequireAuth";
 
 export default function NewArtworkPage() {
+  const auth = useRequireAuth();
+  if (auth !== "authed") {
+    return (
+      <section className="mx-auto max-w-2xl px-6 py-12">
+        <p className="text-sm text-neutral-400">…</p>
+      </section>
+    );
+  }
+
   return (
     <section className="mx-auto max-w-2xl px-6 py-12">
       <Link
@@ -12,7 +23,7 @@ export default function NewArtworkPage() {
         ← artworks
       </Link>
       <h1 className="mt-1 text-xl font-light lowercase">new artwork</h1>
-      <ArtworkForm action={createArtworkAction} submitLabel="create" />
+      <ArtworkForm submitLabel="create" />
     </section>
   );
 }

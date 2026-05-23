@@ -1,22 +1,57 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getAdminClient } from "@/lib/supabase/admin";
+import { getSupabase } from "@/lib/supabase/public";
 import type { CVEntry, CVSection } from "@/lib/types";
 import { CV_SECTIONS } from "@/lib/types";
-import { deleteCVEntryAction } from "../actions";
+import { useRequireAuth } from "../useRequireAuth";
 
-export const dynamic = "force-dynamic";
+export default function AdminCVPage() {
+  const auth = useRequireAuth();
+  const [entries, setEntries] = useState<CVEntry[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function AdminCVPage() {
-  const supabase = getAdminClient();
-  const { data, error } = await supabase
-    .from("cv_entries")
-    .select("*")
-    .order("year", { ascending: false, nullsFirst: false })
-    .order("display_order", { ascending: true });
+  async function load() {
+    const { data, error } = await getSupabase()
+      .from("cv_entries")
+      .select("*")
+      .order("year", { ascending: false, nullsFirst: false })
+      .order("display_order", { ascending: true });
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setEntries((data ?? []) as CVEntry[]);
+  }
 
-  const entries = (data ?? []) as CVEntry[];
+  useEffect(() => {
+    if (auth === "authed") load();
+  }, [auth]);
+
+  async function onDelete(id: string) {
+    if (!confirm("Delete this entry?")) return;
+    const { error } = await getSupabase()
+      .from("cv_entries")
+      .delete()
+      .eq("id", id);
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    load();
+  }
+
+  if (auth !== "authed") {
+    return (
+      <section className="mx-auto max-w-3xl px-6 py-12">
+        <p className="text-sm text-neutral-400">…</p>
+      </section>
+    );
+  }
+
   const bySection = new Map<CVSection, CVEntry[]>();
-  for (const e of entries) {
+  for (const e of entries ?? []) {
     if (!bySection.has(e.section)) bySection.set(e.section, []);
     bySection.get(e.section)!.push(e);
   }
@@ -42,10 +77,12 @@ export default async function AdminCVPage() {
       </div>
 
       {error && (
-        <p className="mt-6 text-sm text-red-600">Error: {error.message}</p>
+        <p className="mt-6 text-sm text-red-600">Error: {error}</p>
       )}
 
-      {entries.length === 0 ? (
+      {entries === null ? (
+        <p className="mt-12 text-sm text-neutral-400">…</p>
+      ) : entries.length === 0 ? (
         <p className="mt-12 text-sm text-neutral-500">No entries yet.</p>
       ) : (
         <div className="mt-10 space-y-10">
@@ -73,21 +110,17 @@ export default async function AdminCVPage() {
                         )}
                       </span>
                       <Link
-                        href={`/admin/cv/${e.id}`}
+                        href={`/admin/cv/edit?id=${e.id}`}
                         className="text-neutral-700 hover:text-neutral-900 underline"
                       >
                         edit
                       </Link>
-                      <form
-                        action={async () => {
-                          "use server";
-                          await deleteCVEntryAction(e.id);
-                        }}
+                      <button
+                        onClick={() => onDelete(e.id)}
+                        className="text-red-600 hover:text-red-800"
                       >
-                        <button className="text-red-600 hover:text-red-800">
-                          delete
-                        </button>
-                      </form>
+                        delete
+                      </button>
                     </li>
                   ))}
                 </ul>

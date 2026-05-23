@@ -1,29 +1,48 @@
-import { getPublicClient } from "@/lib/supabase/public";
+"use client";
+
+import { useEffect, useState } from "react";
+import { getSupabase } from "@/lib/supabase/public";
 import type { CVEntry, CVSection } from "@/lib/types";
 import { CV_SECTIONS } from "@/lib/types";
 
-export const revalidate = 60;
+export default function CVPage() {
+  const [entries, setEntries] = useState<CVEntry[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function CVPage() {
-  const supabase = getPublicClient();
-  const { data, error } = await supabase
-    .from("cv_entries")
-    .select("*")
-    .order("year", { ascending: false, nullsFirst: false })
-    .order("display_order", { ascending: true });
+  useEffect(() => {
+    const supabase = getSupabase();
+    (async () => {
+      const { data, error } = await supabase
+        .from("cv_entries")
+        .select("*")
+        .order("year", { ascending: false, nullsFirst: false })
+        .order("display_order", { ascending: true });
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      setEntries((data ?? []) as CVEntry[]);
+    })();
+  }, []);
 
   if (error) {
     return (
       <section className="mx-auto max-w-3xl px-6 py-16">
         <h1 className="text-2xl font-light lowercase">cv</h1>
-        <p className="mt-6 text-sm text-red-600">
-          Failed to load: {error.message}
-        </p>
+        <p className="mt-6 text-sm text-red-600">Failed to load: {error}</p>
       </section>
     );
   }
 
-  const entries = (data ?? []) as CVEntry[];
+  if (entries === null) {
+    return (
+      <section className="mx-auto max-w-3xl px-6 py-16">
+        <h1 className="text-2xl font-light lowercase">cv</h1>
+        <p className="mt-8 text-sm text-neutral-400">…</p>
+      </section>
+    );
+  }
+
   const bySection = new Map<CVSection, CVEntry[]>();
   for (const e of entries) {
     if (!bySection.has(e.section)) bySection.set(e.section, []);

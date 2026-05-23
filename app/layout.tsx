@@ -12,6 +12,12 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="h-full antialiased">
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css"
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-white text-neutral-900">
         <header className="border-b border-neutral-200">
           <div className="mx-auto max-w-5xl px-6 py-6 flex items-baseline justify-between">

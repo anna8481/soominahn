@@ -1,8 +1,13 @@
-import { createClient } from "@supabase/supabase-js";
+"use client";
 
-// Public (anon) client — safe for read-only access from server components.
-// All writes go through lib/supabase/admin.ts (service role) inside server actions.
-export function getPublicClient() {
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+// Browser singleton — persists auth session in localStorage so that
+// admin pages can read the logged-in user across navigations.
+let client: SupabaseClient | null = null;
+
+export function getSupabase(): SupabaseClient {
+  if (client) return client;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anon) {
@@ -10,7 +15,14 @@ export function getPublicClient() {
       "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY"
     );
   }
-  return createClient(url, anon, {
-    auth: { persistSession: false },
+  client = createClient(url, anon, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
   });
+  return client;
 }
+
+export const ARTWORK_BUCKET = "artworks";

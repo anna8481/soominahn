@@ -1,28 +1,58 @@
 "use client";
 
-import { useActionState } from "react";
-import { useSearchParams } from "next/navigation";
-import { loginAction } from "../actions";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getSupabase } from "@/lib/supabase/public";
 
 export default function LoginForm() {
+  const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") ?? "/admin";
-  const [state, action, pending] = useActionState(loginAction, null);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setPending(true);
+    const supabase = getSupabase();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    setPending(false);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    router.replace(next.startsWith("/admin") ? next : "/admin");
+  }
 
   return (
-    <form action={action} className="mt-8 space-y-4">
-      <input type="hidden" name="next" value={next} />
+    <form onSubmit={onSubmit} className="mt-8 space-y-4">
+      <input
+        type="email"
+        name="email"
+        placeholder="email"
+        required
+        autoFocus
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        className="w-full border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:border-neutral-900"
+      />
       <input
         type="password"
         name="password"
         placeholder="password"
         required
-        autoFocus
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
         className="w-full border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:border-neutral-900"
       />
-      {state?.error && (
-        <p className="text-sm text-red-600">{state.error}</p>
-      )}
+      {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"
         disabled={pending}

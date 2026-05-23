@@ -1,30 +1,49 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { getPublicClient } from "@/lib/supabase/public";
+import { getSupabase } from "@/lib/supabase/public";
 import type { Artwork } from "@/lib/types";
 
-export const revalidate = 60;
+export default function WorkPage() {
+  const [artworks, setArtworks] = useState<Artwork[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-export default async function WorkPage() {
-  const supabase = getPublicClient();
-  const { data, error } = await supabase
-    .from("artworks")
-    .select("*")
-    .order("year", { ascending: false })
-    .order("display_order", { ascending: true })
-    .order("created_at", { ascending: false });
+  useEffect(() => {
+    const supabase = getSupabase();
+    (async () => {
+      const { data, error } = await supabase
+        .from("artworks")
+        .select("*")
+        .order("year", { ascending: false })
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: false });
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      setArtworks((data ?? []) as Artwork[]);
+    })();
+  }, []);
 
   if (error) {
     return (
       <section className="mx-auto max-w-5xl px-6 py-16">
         <h1 className="text-2xl font-light lowercase">work</h1>
-        <p className="mt-6 text-sm text-red-600">
-          Failed to load: {error.message}
-        </p>
+        <p className="mt-6 text-sm text-red-600">Failed to load: {error}</p>
       </section>
     );
   }
 
-  const artworks = (data ?? []) as Artwork[];
+  if (artworks === null) {
+    return (
+      <section className="mx-auto max-w-5xl px-6 py-16">
+        <h1 className="text-2xl font-light lowercase">work</h1>
+        <p className="mt-8 text-sm text-neutral-400">…</p>
+      </section>
+    );
+  }
+
   const byYear = new Map<number, Artwork[]>();
   for (const a of artworks) {
     if (!byYear.has(a.year)) byYear.set(a.year, []);
