@@ -22,7 +22,7 @@ export default function Home() {
   }, []);
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-10">
+    <section className="mx-auto max-w-7xl px-6 py-10">
       {artworks === null ? (
         <div className="py-32 text-center text-sm text-neutral-400">…</div>
       ) : artworks.length === 0 ? (

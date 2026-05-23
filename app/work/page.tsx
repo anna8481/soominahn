@@ -28,7 +28,7 @@ export default function WorkPage() {
 
   if (error) {
     return (
-      <section className="mx-auto max-w-5xl px-6 py-16">
+      <section className="mx-auto max-w-7xl px-6 py-16">
         <h1 className="text-2xl font-light">Work</h1>
         <p className="mt-6 text-sm text-red-600">Failed to load: {error}</p>
       </section>
@@ -37,7 +37,7 @@ export default function WorkPage() {
 
   if (artworks === null) {
     return (
-      <section className="mx-auto max-w-5xl px-6 py-16">
+      <section className="mx-auto max-w-7xl px-6 py-16">
         <h1 className="text-2xl font-light">Work</h1>
         <p className="mt-8 text-sm text-neutral-400">…</p>
       </section>
@@ -52,7 +52,7 @@ export default function WorkPage() {
   const years = Array.from(byYear.keys()).sort((a, b) => b - a);
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-16">
+    <section className="mx-auto max-w-7xl px-6 py-16">
       <h1 className="text-2xl font-light">Work</h1>
 
       {years.length === 0 ? (
@@ -67,19 +67,18 @@ export default function WorkPage() {
               <h2 className="text-lg font-medium text-neutral-500 tabular-nums">
                 {year}
               </h2>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-12">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-12 items-start">
                 {byYear.get(year)!.map((a) => (
                   <li key={a.id} className="space-y-3">
                     {a.image_url ? (
-                      <div className="relative aspect-[4/3] bg-neutral-100 overflow-hidden">
-                        <Image
-                          src={a.image_url}
-                          alt={a.title}
-                          fill
-                          sizes="(max-width: 640px) 100vw, 50vw"
-                          className="object-cover"
-                        />
-                      </div>
+                      <Image
+                        src={a.image_url}
+                        alt={a.title}
+                        width={a.image_width ?? 1200}
+                        height={a.image_height ?? 900}
+                        sizes="(max-width: 640px) 100vw, 50vw"
+                        className="w-full h-auto block"
+                      />
                     ) : (
                       <div className="aspect-[4/3] bg-neutral-100" />
                     )}

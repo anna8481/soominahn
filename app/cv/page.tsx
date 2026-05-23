@@ -27,7 +27,7 @@ export default function CVPage() {
 
   if (error) {
     return (
-      <section className="mx-auto max-w-3xl px-6 py-16">
+      <section className="mx-auto max-w-7xl px-6 py-16">
         <h1 className="text-2xl font-light">CV</h1>
         <p className="mt-6 text-sm text-red-600">Failed to load: {error}</p>
       </section>
@@ -36,7 +36,7 @@ export default function CVPage() {
 
   if (entries === null) {
     return (
-      <section className="mx-auto max-w-3xl px-6 py-16">
+      <section className="mx-auto max-w-7xl px-6 py-16">
         <h1 className="text-2xl font-light">CV</h1>
         <p className="mt-8 text-sm text-neutral-400">…</p>
       </section>
@@ -50,7 +50,7 @@ export default function CVPage() {
   }
 
   return (
-    <section className="mx-auto max-w-3xl px-6 py-16">
+    <section className="mx-auto max-w-7xl px-6 py-16">
       <h1 className="text-2xl font-light">CV</h1>
 
       {entries.length === 0 ? (
