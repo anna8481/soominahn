@@ -28,7 +28,7 @@ export default function WorkPage() {
 
   if (error) {
     return (
-      <section className="mx-auto max-w-7xl px-6 py-16">
+      <section className="mx-auto max-w-7xl px-6 py-6 sm:py-16">
         <h1 className="text-2xl font-light">Work</h1>
         <p className="mt-6 text-sm text-red-600">Failed to load: {error}</p>
       </section>
@@ -37,7 +37,7 @@ export default function WorkPage() {
 
   if (artworks === null) {
     return (
-      <section className="mx-auto max-w-7xl px-6 py-16">
+      <section className="mx-auto max-w-7xl px-6 py-6 sm:py-16">
         <h1 className="text-2xl font-light">Work</h1>
         <p className="mt-8 text-sm text-neutral-400">…</p>
       </section>
@@ -52,7 +52,7 @@ export default function WorkPage() {
   const years = Array.from(byYear.keys()).sort((a, b) => b - a);
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-16">
+    <section className="mx-auto max-w-7xl px-6 py-6 sm:py-16">
       <h1 className="text-2xl font-light">Work</h1>
 
       {years.length === 0 ? (
