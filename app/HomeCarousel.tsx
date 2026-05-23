@@ -68,18 +68,17 @@ export default function HomeCarousel({ artworks }: { artworks: Artwork[] }) {
               key={a.id}
               className="snap-center shrink-0 w-full flex items-center justify-center"
             >
-              <div className="relative w-full aspect-[4/3]">
-                {a.image_url && (
-                  <Image
-                    src={a.image_url}
-                    alt={a.title}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 1024px"
-                    className="object-contain"
-                    priority={artworks.indexOf(a) === 0}
-                  />
-                )}
-              </div>
+              {a.image_url && (
+                <Image
+                  src={a.image_url}
+                  alt={a.title}
+                  width={a.image_width ?? 1200}
+                  height={a.image_height ?? 900}
+                  sizes="(max-width: 1024px) 100vw, 1024px"
+                  className="w-full h-auto max-h-[85vh] object-contain"
+                  priority={artworks.indexOf(a) === 0}
+                />
+              )}
             </div>
           ))}
         </div>
@@ -91,7 +90,7 @@ export default function HomeCarousel({ artworks }: { artworks: Artwork[] }) {
               onClick={() => scrollTo(index - 1)}
               disabled={index === 0}
               aria-label="previous"
-              className="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-neutral-400 hover:text-neutral-900 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+              className="hidden sm:block absolute left-2 top-1/2 -translate-y-1/2 p-2 text-neutral-400 hover:text-neutral-900 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
             >
               ←
             </button>
@@ -100,7 +99,7 @@ export default function HomeCarousel({ artworks }: { artworks: Artwork[] }) {
               onClick={() => scrollTo(index + 1)}
               disabled={index === artworks.length - 1}
               aria-label="next"
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-neutral-400 hover:text-neutral-900 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+              className="hidden sm:block absolute right-2 top-1/2 -translate-y-1/2 p-2 text-neutral-400 hover:text-neutral-900 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
             >
               →
             </button>
@@ -109,8 +108,8 @@ export default function HomeCarousel({ artworks }: { artworks: Artwork[] }) {
       </div>
 
       {current && (
-        <div className="text-sm space-y-1">
-          <div className="flex flex-wrap items-baseline gap-x-3">
+        <div className="text-sm text-center space-y-1">
+          <div className="flex flex-wrap items-baseline justify-center gap-x-3">
             <span className="text-neutral-900">{current.title}</span>
             <span className="text-neutral-500 tabular-nums">{current.year}</span>
           </div>
@@ -121,7 +120,7 @@ export default function HomeCarousel({ artworks }: { artworks: Artwork[] }) {
             <div className="text-neutral-500">{current.medium}</div>
           )}
           {current.statement && (
-            <p className="pt-2 text-neutral-700 leading-relaxed max-w-2xl whitespace-pre-line">
+            <p className="pt-2 text-neutral-700 leading-relaxed max-w-2xl mx-auto whitespace-pre-line">
               {current.statement}
             </p>
           )}
