@@ -6,6 +6,8 @@ export type Artwork = {
   medium: string | null;
   dimensions: string | null;
   image_url: string | null;
+  image_width: number | null;
+  image_height: number | null;
   featured: boolean;
   display_order: number;
   created_at: string;
@@ -31,9 +33,21 @@ export type CVEntry = {
   id: string;
   section: CVSection;
   year: number | null;
+  year_end: number | null;
   title: string;
   link: string | null;
   display_order: number;
   created_at: string;
   updated_at: string;
 };
+
+export function formatYearRange(
+  year: number | null,
+  yearEnd: number | null
+): string {
+  if (year == null && yearEnd == null) return "";
+  if (year != null && yearEnd != null && year !== yearEnd) {
+    return `${year}–${yearEnd}`;
+  }
+  return String(year ?? yearEnd);
+}

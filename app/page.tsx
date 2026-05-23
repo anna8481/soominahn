@@ -11,24 +11,13 @@ export default function Home() {
   useEffect(() => {
     const supabase = getSupabase();
     (async () => {
-      const { data: featured } = await supabase
+      const { data } = await supabase
         .from("artworks")
         .select("*")
         .eq("featured", true)
         .order("display_order", { ascending: true })
         .order("year", { ascending: false });
-
-      let list = (featured ?? []) as Artwork[];
-      if (list.length === 0) {
-        const { data: recent } = await supabase
-          .from("artworks")
-          .select("*")
-          .order("year", { ascending: false })
-          .order("display_order", { ascending: true })
-          .limit(8);
-        list = (recent ?? []) as Artwork[];
-      }
-      setArtworks(list);
+      setArtworks((data ?? []) as Artwork[]);
     })();
   }, []);
 

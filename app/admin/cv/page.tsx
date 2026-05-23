@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getSupabase } from "@/lib/supabase/public";
 import type { CVEntry, CVSection } from "@/lib/types";
-import { CV_SECTIONS } from "@/lib/types";
+import { CV_SECTIONS, formatYearRange } from "@/lib/types";
 import { useRequireAuth } from "../useRequireAuth";
 
 export default function AdminCVPage() {
@@ -100,8 +100,8 @@ export default function AdminCVPage() {
                       key={e.id}
                       className="py-2.5 flex items-center gap-4 text-sm"
                     >
-                      <span className="w-12 text-neutral-500 tabular-nums">
-                        {e.year ?? ""}
+                      <span className="w-24 text-neutral-500 tabular-nums whitespace-nowrap">
+                        {formatYearRange(e.year, e.year_end)}
                       </span>
                       <span className="flex-1 min-w-0 truncate">
                         <span className="text-neutral-900">{e.title}</span>

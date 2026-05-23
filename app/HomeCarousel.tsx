@@ -68,7 +68,7 @@ export default function HomeCarousel({ artworks }: { artworks: Artwork[] }) {
               key={a.id}
               className="snap-center shrink-0 w-full flex items-center justify-center"
             >
-              <div className="relative w-full aspect-[4/3] bg-neutral-100">
+              <div className="relative w-full aspect-[4/3]">
                 {a.image_url && (
                   <Image
                     src={a.image_url}
@@ -91,7 +91,7 @@ export default function HomeCarousel({ artworks }: { artworks: Artwork[] }) {
               onClick={() => scrollTo(index - 1)}
               disabled={index === 0}
               aria-label="previous"
-              className="absolute left-2 top-1/2 -translate-y-1/2 size-10 rounded-full bg-white/80 backdrop-blur border border-neutral-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-neutral-400 hover:text-neutral-900 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
             >
               ←
             </button>
@@ -100,7 +100,7 @@ export default function HomeCarousel({ artworks }: { artworks: Artwork[] }) {
               onClick={() => scrollTo(index + 1)}
               disabled={index === artworks.length - 1}
               aria-label="next"
-              className="absolute right-2 top-1/2 -translate-y-1/2 size-10 rounded-full bg-white/80 backdrop-blur border border-neutral-200 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-neutral-400 hover:text-neutral-900 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
             >
               →
             </button>

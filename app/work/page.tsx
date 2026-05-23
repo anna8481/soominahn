@@ -29,7 +29,7 @@ export default function WorkPage() {
   if (error) {
     return (
       <section className="mx-auto max-w-5xl px-6 py-16">
-        <h1 className="text-2xl font-light lowercase">work</h1>
+        <h1 className="text-2xl font-light">Work</h1>
         <p className="mt-6 text-sm text-red-600">Failed to load: {error}</p>
       </section>
     );
@@ -38,7 +38,7 @@ export default function WorkPage() {
   if (artworks === null) {
     return (
       <section className="mx-auto max-w-5xl px-6 py-16">
-        <h1 className="text-2xl font-light lowercase">work</h1>
+        <h1 className="text-2xl font-light">Work</h1>
         <p className="mt-8 text-sm text-neutral-400">…</p>
       </section>
     );
@@ -53,7 +53,7 @@ export default function WorkPage() {
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-16">
-      <h1 className="text-2xl font-light lowercase">work</h1>
+      <h1 className="text-2xl font-light">Work</h1>
 
       {years.length === 0 ? (
         <p className="mt-8 text-sm text-neutral-500">No works yet.</p>

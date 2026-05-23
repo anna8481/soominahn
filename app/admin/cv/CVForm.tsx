@@ -39,12 +39,18 @@ export default function CVForm({ initial, submitLabel }: Props) {
       if (year !== null && !Number.isFinite(year)) {
         throw new Error("Year must be a number");
       }
+      const yearEndRaw = String(fd.get("year_end") ?? "").trim();
+      const yearEnd = yearEndRaw === "" ? null : Number(yearEndRaw);
+      if (yearEnd !== null && !Number.isFinite(yearEnd)) {
+        throw new Error("Year end must be a number");
+      }
       const title = String(fd.get("title") ?? "").trim();
       if (!title) throw new Error("Title is required");
 
       const fields = {
         section,
         year,
+        year_end: yearEnd,
         title,
         link: String(fd.get("link") ?? "").trim() || null,
         display_order: Number(fd.get("display_order") || 0),
@@ -87,18 +93,19 @@ export default function CVForm({ initial, submitLabel }: Props) {
         </select>
       </label>
 
-      <div className="grid grid-cols-[1fr_120px] gap-4">
-        <label className="block">
-          <div className="text-neutral-600 mb-1">Title *</div>
-          <input
-            name="title"
-            type="text"
-            required
-            placeholder="e.g. Couleurs de Corée, Centre Culturel Coréen, Paris"
-            defaultValue={initial?.title ?? ""}
-            className="w-full border border-neutral-300 px-3 py-2 focus:outline-none focus:border-neutral-900"
-          />
-        </label>
+      <label className="block">
+        <div className="text-neutral-600 mb-1">Title *</div>
+        <input
+          name="title"
+          type="text"
+          required
+          placeholder="e.g. Couleurs de Corée, Centre Culturel Coréen, Paris"
+          defaultValue={initial?.title ?? ""}
+          className="w-full border border-neutral-300 px-3 py-2 focus:outline-none focus:border-neutral-900"
+        />
+      </label>
+
+      <div className="grid grid-cols-2 gap-4">
         <label className="block">
           <div className="text-neutral-600 mb-1">Year</div>
           <input
@@ -106,6 +113,18 @@ export default function CVForm({ initial, submitLabel }: Props) {
             type="number"
             placeholder="2025"
             defaultValue={initial?.year ?? ""}
+            className="w-full border border-neutral-300 px-3 py-2 focus:outline-none focus:border-neutral-900"
+          />
+        </label>
+        <label className="block">
+          <div className="text-neutral-600 mb-1">
+            Year end <span className="text-neutral-400">(범위일 때만)</span>
+          </div>
+          <input
+            name="year_end"
+            type="number"
+            placeholder="2027"
+            defaultValue={initial?.year_end ?? ""}
             className="w-full border border-neutral-300 px-3 py-2 focus:outline-none focus:border-neutral-900"
           />
         </label>

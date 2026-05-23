@@ -16,20 +16,43 @@ export default function ArtworkForm({ initial, submitLabel }: Props) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function uploadImageIfAny(file: File | null): Promise<string | null> {
+  // Downscale to max 1600px on the longer side (preserves aspect ratio) and
+  // re-encode as WebP to keep uploads small.
+  async function resizeImage(
+    file: File,
+    maxDim = 1600
+  ): Promise<{ blob: Blob; width: number; height: number }> {
+    const bitmap = await createImageBitmap(file);
+    const ratio = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    const width = Math.round(bitmap.width * ratio);
+    const height = Math.round(bitmap.height * ratio);
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Canvas 2D context unavailable");
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/webp", 0.85)
+    );
+    if (!blob) throw new Error("Image encoding failed");
+    return { blob, width, height };
+  }
+
+  async function uploadImageIfAny(
+    file: File | null
+  ): Promise<{ url: string; width: number; height: number } | null> {
     if (!file || file.size === 0) return null;
+    const { blob, width, height } = await resizeImage(file);
     const supabase = getSupabase();
-    const ext = (file.name.split(".").pop() || "bin").toLowerCase();
-    const key = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const key = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
     const { error } = await supabase.storage
       .from(ARTWORK_BUCKET)
-      .upload(key, file, {
-        contentType: file.type || "application/octet-stream",
-        upsert: false,
-      });
+      .upload(key, blob, { contentType: "image/webp", upsert: false });
     if (error) throw new Error(`Upload failed: ${error.message}`);
     const { data } = supabase.storage.from(ARTWORK_BUCKET).getPublicUrl(key);
-    return data.publicUrl;
+    return { url: data.publicUrl, width, height };
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -55,21 +78,28 @@ export default function ArtworkForm({ initial, submitLabel }: Props) {
         display_order: Number(fd.get("display_order") || 0),
       };
       const file = fd.get("image") as File | null;
-      const newUrl = await uploadImageIfAny(file);
+      const uploaded = await uploadImageIfAny(file);
 
       const supabase = getSupabase();
       if (initial) {
         const patch: Record<string, unknown> = { ...fields };
-        if (newUrl) patch.image_url = newUrl;
+        if (uploaded) {
+          patch.image_url = uploaded.url;
+          patch.image_width = uploaded.width;
+          patch.image_height = uploaded.height;
+        }
         const { error } = await supabase
           .from("artworks")
           .update(patch)
           .eq("id", initial.id);
         if (error) throw new Error(error.message);
       } else {
-        const { error } = await supabase
-          .from("artworks")
-          .insert({ ...fields, image_url: newUrl });
+        const { error } = await supabase.from("artworks").insert({
+          ...fields,
+          image_url: uploaded?.url ?? null,
+          image_width: uploaded?.width ?? null,
+          image_height: uploaded?.height ?? null,
+        });
         if (error) throw new Error(error.message);
       }
       router.push("/admin/artworks");

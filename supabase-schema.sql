@@ -11,11 +11,17 @@ create table if not exists public.artworks (
   medium text,
   dimensions text,           -- e.g. "120 x 90 cm"
   image_url text,
+  image_width int,           -- pixel width of stored image
+  image_height int,          -- pixel height of stored image
   featured boolean not null default false,  -- show in home carousel
   display_order int not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Add image dimension columns to existing tables (safe if they already exist)
+alter table public.artworks add column if not exists image_width int;
+alter table public.artworks add column if not exists image_height int;
 
 create index if not exists artworks_year_order_idx
   on public.artworks (year desc, display_order asc, created_at desc);
@@ -27,13 +33,17 @@ create index if not exists artworks_year_order_idx
 create table if not exists public.cv_entries (
   id uuid primary key default gen_random_uuid(),
   section text not null,
-  year int,                  -- nullable (e.g. contact rows have no year)
+  year int,                  -- nullable (e.g. contact rows have no year); start year for ranges
+  year_end int,              -- nullable; end year for ranges like "2023-2027"
   title text not null,       -- the full line of text for this entry
   link text,                 -- optional URL (renders as ↗)
   display_order int not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Add range column to existing tables (safe if it already exists)
+alter table public.cv_entries add column if not exists year_end int;
 
 create index if not exists cv_entries_section_year_idx
   on public.cv_entries (section, year desc nulls last, display_order asc);

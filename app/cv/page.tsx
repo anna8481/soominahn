@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getSupabase } from "@/lib/supabase/public";
 import type { CVEntry, CVSection } from "@/lib/types";
-import { CV_SECTIONS } from "@/lib/types";
+import { CV_SECTIONS, formatYearRange } from "@/lib/types";
 
 export default function CVPage() {
   const [entries, setEntries] = useState<CVEntry[] | null>(null);
@@ -28,7 +28,7 @@ export default function CVPage() {
   if (error) {
     return (
       <section className="mx-auto max-w-3xl px-6 py-16">
-        <h1 className="text-2xl font-light lowercase">cv</h1>
+        <h1 className="text-2xl font-light">CV</h1>
         <p className="mt-6 text-sm text-red-600">Failed to load: {error}</p>
       </section>
     );
@@ -37,7 +37,7 @@ export default function CVPage() {
   if (entries === null) {
     return (
       <section className="mx-auto max-w-3xl px-6 py-16">
-        <h1 className="text-2xl font-light lowercase">cv</h1>
+        <h1 className="text-2xl font-light">CV</h1>
         <p className="mt-8 text-sm text-neutral-400">…</p>
       </section>
     );
@@ -51,7 +51,7 @@ export default function CVPage() {
 
   return (
     <section className="mx-auto max-w-3xl px-6 py-16">
-      <h1 className="text-2xl font-light lowercase">cv</h1>
+      <h1 className="text-2xl font-light">CV</h1>
 
       {entries.length === 0 ? (
         <p className="mt-8 text-sm text-neutral-500">No CV entries yet.</p>
@@ -69,10 +69,10 @@ export default function CVPage() {
                   {rows.map((e) => (
                     <li
                       key={e.id}
-                      className="grid grid-cols-[56px_1fr] gap-4"
+                      className="grid grid-cols-[96px_1fr] gap-4"
                     >
-                      <span className="text-neutral-500 tabular-nums">
-                        {e.year ?? ""}
+                      <span className="text-neutral-500 tabular-nums whitespace-nowrap">
+                        {formatYearRange(e.year, e.year_end)}
                       </span>
                       <span className="text-neutral-900">
                         {e.link ? (
